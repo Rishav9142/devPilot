@@ -233,7 +233,13 @@ export function GhostButtonLink({
   className?: string;
 }) {
   return (
-    <Button variant="ghost" size="sm" className={className} render={<Link href={href} />}>
+    <Button
+      variant="ghost"
+      size="sm"
+      className={className}
+      nativeButton={false}
+      render={<Link href={href} />}
+    >
       {children}
     </Button>
   );

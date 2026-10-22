@@ -79,11 +79,14 @@ export async function streamChatMessage(
           handlers.onAssistantMessage?.(JSON.parse(data) as ChatMessage);
         } else if (event === "done") {
           handlers.onDone?.();
+        } else if (event === "error") {
+          throw new Error(data);
         }
       } catch (err) {
-        handlers.onError?.(
-          err instanceof Error ? err : new Error("Failed to parse SSE event")
-        );
+        const error =
+          err instanceof Error ? err : new Error("Failed to parse SSE event");
+        handlers.onError?.(error);
+        if (event === "error") throw error;
       }
     }
   }

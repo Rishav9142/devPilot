@@ -54,11 +54,14 @@ public class ChatStreamHandler {
                     .doOnNext(token -> appendToken(emitter, fullReply, token))
                     .doOnError(err -> {
                         log.error("Chat stream error", err);
-                        emitter.completeWithError(err);
+                        sendStreamError(emitter);
                     })
                     .doOnComplete(() -> completeStream(
                             emitter, sessionId, fullReply, citations))
-                    .subscribe();
+                    .subscribe(
+                            ignored -> {
+                            },
+                            err -> log.debug("Chat stream terminated after sending the client error", err));
         } catch (Exception ex) {
             emitter.completeWithError(ex);
         }
@@ -74,6 +77,18 @@ public class ChatStreamHandler {
                     .data(token, MediaType.APPLICATION_JSON));
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
+        }
+    }
+
+    private void sendStreamError(SseEmitter emitter) {
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("error")
+                    .data("The AI model could not generate a response. Check the configured OpenRouter chat model."));
+            emitter.complete();
+        } catch (Exception sendError) {
+            log.debug("Unable to send chat stream error to client", sendError);
+            emitter.completeWithError(sendError);
         }
     }
 

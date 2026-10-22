@@ -132,6 +132,7 @@ export function RepoCard({ repo }: { repo: Repository }) {
           <Button
             variant="ghost"
             size="sm"
+            nativeButton={false}
             render={<a href={repo.htmlUrl} target="_blank" rel="noreferrer" />}
           >
             <ExternalLink data-icon="inline-start" />
