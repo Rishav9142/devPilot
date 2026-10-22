@@ -1,6 +1,6 @@
 # DevPilot
 
-**An AI-powered GitHub repository assistant that helps developers understand their codebase through context-aware chat and source citations.**
+**An AI-powered GitHub repository assistant for exploring codebases through context-aware chat and source citations.**
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1.0-6DB33F?style=flat-square&logo=springboot&logoColor=white)
@@ -11,39 +11,66 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![pgvector](https://img.shields.io/badge/pgvector-enabled-336791?style=flat-square&logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-build-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-integrated-412991?style=flat-square&logo=openai&logoColor=white)
 
 ## Overview
 
-DevPilot connects to GitHub repositories, indexes source code, and lets developers ask questions about their implementation using AI.
+DevPilot connects to GitHub repositories, indexes their source code, and lets developers ask natural-language questions about their implementation.
 
-It uses **Retrieval-Augmented Generation (RAG)** to retrieve relevant code context before generating answers, helping developers explore unfamiliar codebases with source citations.
+Using Retrieval-Augmented Generation (RAG), DevPilot retrieves relevant code context before generating an answer. Responses are streamed in real time and include source citations when available, making it easier to understand unfamiliar codebases.
 
 ## Features
 
-- **GitHub OAuth** — Authenticate and access repositories permitted by your authorization.
-- **Repository indexing** — Fetch source files, split code into chunks, and generate embeddings.
-- **Semantic code search** — Retrieve relevant code using PostgreSQL and pgvector.
-- **AI-powered chat** — Ask natural-language questions about an indexed repository.
-- **Streaming responses** — Receive answers in real time using Server-Sent Events (SSE).
-- **Source citations** — Trace answers to relevant files and line ranges when available.
-- **Persistent chat sessions** — Create conversations and revisit previous messages.
-- **Indexing status** — Track repository indexing progress.
+- **GitHub OAuth authentication**
+  - Sign in with GitHub.
+  - Access repositories permitted by the OAuth authorization.
+
+- **Repository discovery**
+  - Retrieve repositories associated with the authenticated GitHub account.
+  - View repository metadata and indexing status.
+
+- **Asynchronous repository indexing**
+  - Fetch source files through the GitHub API.
+  - Filter unsupported and oversized files.
+  - Split source code into searchable chunks.
+  - Generate and store vector embeddings.
+
+- **Semantic code search**
+  - Search indexed code using PostgreSQL and `pgvector`.
+  - Retrieve context relevant to each user question.
+
+- **AI-powered chat**
+  - Ask natural-language questions about an indexed repository.
+  - Generate answers using Spring AI and an OpenAI-compatible chat model.
+
+- **Streaming responses**
+  - Receive assistant responses progressively using Server-Sent Events (SSE).
+
+- **Source citations**
+  - Reference relevant files, line ranges, and programming languages when available.
+
+- **Persistent chat sessions**
+  - Create conversations for indexed repositories.
+  - Store and revisit previous messages.
+
+- **Indexing progress**
+  - Track files processed, chunks created, completion status, and indexing errors.
 
 ## Tech Stack
 
 | Layer | Technologies |
-|---|---|
+| --- | --- |
 | Frontend | Next.js 16, React 19, TypeScript |
 | Styling | Tailwind CSS 4 |
-| Backend | Java 21, Spring Boot 4 |
-| AI integration | Spring AI, OpenRouter |
+| Backend | Java 21, Spring Boot 4.1 |
+| AI integration | Spring AI 2.0, OpenAI-compatible chat model |
 | Database | PostgreSQL 16, pgvector |
 | Persistence | Spring Data JPA, Hibernate |
 | Authentication | GitHub OAuth 2.0 |
+| Communication | REST API and Server-Sent Events |
 | Infrastructure | Docker Compose |
+| Build tools | Maven and npm |
 
 ## Architecture
 
@@ -51,32 +78,61 @@ It uses **Retrieval-Augmented Generation (RAG)** to retrieve relevant code conte
 flowchart TD
     A[Next.js Frontend] <-->|REST API / SSE| B[Spring Boot Backend]
     B <--> C[GitHub API]
-    B --> D[Code Indexing]
-    D --> E[Embeddings]
+    B --> D[Repository Indexing]
+    D --> E[Code Chunking and Embeddings]
     E --> F[(PostgreSQL + pgvector)]
     B --> G[Semantic Retrieval]
     F --> G
-    G --> H[Spring AI / OpenRouter]
+    G --> H[Spring AI / AI Model]
     H --> B
 ```
 
 ## How It Works
 
-1. Sign in with GitHub and select a repository.
-2. Index the repository's supported source files.
-3. DevPilot splits the code into chunks and stores their embeddings in pgvector.
-4. Ask a question about the indexed codebase.
-5. DevPilot retrieves relevant code context and sends it to the configured AI model.
-6. Receive a streamed answer with source citations when available.
+1. Authenticate with GitHub.
+2. Select a repository from the connected GitHub account.
+3. Start repository indexing.
+4. DevPilot fetches supported source files from GitHub.
+5. Files are split into chunks and stored as vector embeddings.
+6. Create a chat session for the indexed repository.
+7. Ask a question about the codebase.
+8. DevPilot retrieves relevant code context.
+9. The configured AI model generates a grounded response.
+10. The answer is streamed to the frontend with citations when available.
 
 ## Project Structure
 
 ```text
 devPilot/
-├── backend/              # Spring Boot API and AI services
-├── client/               # Next.js frontend
+├── backend/
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── devPilot/backend/
+│   │   │   │       ├── config/
+│   │   │   │       ├── controllers/
+│   │   │   │       ├── dto/
+│   │   │   │       ├── entity/
+│   │   │   │       ├── repository/
+│   │   │   │       ├── security/
+│   │   │   │       └── services/
+│   │   │   └── resources/
+│   │   └── test/
+│   ├── pom.xml
+│   ├── mvnw
+│   └── mvnw.cmd
+│
+├── client/
+│   ├── app/                  # Next.js routes and pages
+│   ├── components/           # UI and feature components
+│   ├── hooks/                # React hooks
+│   ├── lib/                  # API client and shared utilities
+│   ├── public/               # Static assets
+│   └── package.json
+│
 ├── docker/
-│   └── postgres/         # PostgreSQL initialization
+│   └── postgres/             # PostgreSQL initialization scripts
+│
 ├── docker-compose.yml
 └── README.md
 ```
@@ -85,11 +141,13 @@ devPilot/
 
 ### Prerequisites
 
-- Java 21
-- Node.js 20+ and npm
+Install the following before running DevPilot locally:
+
+- Java Development Kit 21
+- Node.js and npm
 - Docker Desktop with Docker Compose
-- GitHub OAuth application credentials
-- OpenRouter API key or another compatible AI provider
+- A GitHub OAuth application
+- An API key for the configured OpenAI-compatible AI provider
 
 ### 1. Clone the repository
 
@@ -98,38 +156,7 @@ git clone https://github.com/Aestheticsuraj234/devPilot.git
 cd devPilot
 ```
 
-### 2. Configure environment variables
-
-Create a `.env` file in the repository root:
-
-```dotenv
-POSTGRES_DB=devpilot
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your-database-password
-
-DB_URL=jdbc:postgresql://localhost:5433/devpilot
-DB_USERNAME=postgres
-DB_PASSWORD=your-database-password
-
-TOKEN_ENCRYPTOR_PASSWORD=your-encryption-secret
-TOKEN_ENCRYPTOR_SALT=your-encryption-salt
-
-OPENAI_API_KEY=your-openrouter-api-key
-OPENAI_CHAT_MODEL=openai/gpt-4.1-mini
-
-GITHUB_CLIENT_ID=your-github-client-id
-GITHUB_CLIENT_SECRET=your-github-client-secret
-```
-
-Configure the GitHub OAuth callback URL as:
-
-```text
-http://localhost:8080/login/oauth2/code/github
-```
-
-Ensure the environment variable names match the backend configuration. Never commit real credentials or secrets.
-
-### 3. Start the database
+### 2. Start PostgreSQL and pgvector
 
 From the repository root:
 
@@ -137,14 +164,72 @@ From the repository root:
 docker compose up -d postgres
 ```
 
-### 4. Start the backend
+The local database is exposed on port `5433`.
 
-On Windows PowerShell:
+Default development connection details:
 
-```powershell
-cd backend
-.\mvnw.cmd spring-boot:run
+```text
+Host: localhost
+Port: 5433
+Database: devpilot
+Username: postgres
+Password: postgres
 ```
+
+The Docker Compose configuration uses the `pgvector/pgvector:pg16` image and initializes the required PostgreSQL extensions.
+
+> The included database credentials are for local development only. Use secure credentials in shared or production environments.
+
+### 3. Configure the backend
+
+Configure the backend using your Spring Boot configuration file or environment-specific configuration.
+
+The following application properties are required by the project:
+
+```properties
+# Frontend and CORS
+app.frontend-url=http://localhost:3000
+app.cors.allowed-origins=http://localhost:3000
+
+# Encryption used for stored GitHub access tokens
+app.token-encryptor-password=replace-with-a-secure-local-secret
+app.token-encryptor-salt=replace-with-a-secure-salt
+
+# GitHub API behavior
+app.github.api-delay-ms=50
+
+# Repository indexing
+app.indexing.chunk-size=800
+app.indexing.max-file-bytes=102400
+```
+
+Configure the database connection:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5433/devpilot
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+```
+
+Configure GitHub OAuth and Spring AI according to your environment. Do not commit real credentials or secrets.
+
+A local GitHub OAuth application should use the following callback URL:
+
+```text
+http://localhost:8080/login/oauth2/code/github
+```
+#### AI provider
+
+DevPilot uses Spring AI's OpenAI-compatible chat model integration.
+
+For OpenAI:
+
+```properties
+spring.ai.openai.api-key=your-openai-api-key
+spring.ai.openai.chat.options.model=your-chat-model
+```
+
+### 4. Start the backend
 
 On macOS or Linux:
 
@@ -153,11 +238,22 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-Backend URL: `http://localhost:8080`
+On Windows PowerShell:
 
-### 5. Start the frontend
+```powershell
+cd backend
+.\mvnw.cmd spring-boot:run
+```
 
-Open another terminal:
+The backend runs at:
+
+```text
+http://localhost:8080
+```
+
+### 5. Configure and start the frontend
+
+Open a separate terminal:
 
 ```bash
 cd client
@@ -166,7 +262,7 @@ npm install
 
 Create `client/.env.local`:
 
-```dotenv
+```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
 
@@ -176,15 +272,155 @@ Start the development server:
 npm run dev
 ```
 
-Open **http://localhost:3000** to use DevPilot.
+Open the application at:
+
+```text
+http://localhost:3000
+```
+
+## Usage
+
+1. Open DevPilot in your browser.
+2. Select **Continue with GitHub**.
+3. Authorize the GitHub OAuth application.
+4. Choose a repository.
+5. Start indexing.
+6. Wait until the repository status is `READY`.
+7. Create a chat session.
+8. Ask questions about the codebase.
+9. Review the generated answer and available source citations.
+
+A repository must be successfully indexed before it can be used for chat.
+
+## API Overview
+
+The frontend communicates with the backend through REST endpoints and Server-Sent Events.
+
+| API area | Purpose |
+| --- | --- |
+| `/api/auth` | Authentication, current-user information, and logout |
+| `/api/repos` | Repository listing, details, indexing, and status |
+| `/api/chat/sessions` | Chat session creation and history |
+| Chat streaming endpoint | Streams assistant messages and citations over SSE |
+
+Protected `/api` endpoints require an authenticated session.
 
 ## Useful Commands
 
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Start the frontend |
-| `npm run build` | Build the frontend |
-| `npm run lint` | Lint the frontend |
-| `.\mvnw.cmd test` | Run backend tests on Windows |
-| `docker compose down` | Stop local services |
+### Frontend
 
+Run these commands from the `client` directory:
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Next.js development server |
+| `npm run build` | Create a production frontend build |
+| `npm run start` | Start the production frontend server |
+| `npm run lint` | Run ESLint |
+
+### Backend
+
+Run these commands from the `backend` directory:
+
+| Command | Description |
+| --- | --- |
+| `./mvnw spring-boot:run` | Start the Spring Boot application |
+| `./mvnw test` | Run backend tests |
+| `./mvnw clean package` | Clean and package the backend |
+
+On Windows, use `mvnw.cmd` instead of `./mvnw`.
+
+### Infrastructure
+
+Run these commands from the repository root:
+
+| Command | Description |
+| --- | --- |
+| `docker compose up -d postgres` | Start PostgreSQL with pgvector |
+| `docker compose down` | Stop local services |
+| `docker compose logs -f postgres` | Follow PostgreSQL logs |
+
+## Testing
+
+Run backend tests:
+
+```bash
+cd backend
+./mvnw test
+```
+
+On Windows:
+
+```powershell
+cd backend
+.\mvnw.cmd test
+```
+
+Run frontend linting:
+
+```bash
+cd client
+npm run lint
+```
+
+Create a production frontend build:
+
+```bash
+cd client
+npm run build
+```
+
+## Production Considerations
+
+Before deploying DevPilot to a shared or production environment:
+
+- Replace the default PostgreSQL credentials.
+- Use a secure secrets manager for OAuth credentials and API keys.
+- Generate strong token-encryption passwords and salts.
+- Restrict `app.cors.allowed-origins` to trusted frontend domains.
+- Use HTTPS for frontend, backend, OAuth, and SSE traffic.
+- Do not expose PostgreSQL publicly unless required.
+- Review GitHub OAuth permissions carefully.
+- Monitor GitHub API rate limits.
+- Configure database backups and persistent storage.
+- Use production-specific Spring Boot and Next.js configuration.
+
+## Contributing
+
+Contributions are welcome.
+
+1. Fork the repository.
+2. Create a feature branch:
+
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+
+3. Make your changes.
+4. Run the relevant tests, build commands, and linters.
+5. Commit your changes with a clear message.
+6. Push your branch.
+7. Open a pull request describing the change.
+
+Please avoid committing credentials, generated files, local environment files, or production configuration.
+
+## Security
+
+If you discover a security vulnerability, please avoid opening a public issue with sensitive details. Contact the repository maintainer privately with the relevant information and reproduction steps.
+
+## License
+
+No license file is currently included in this repository. Until a license is added, the project should not be assumed to be available for redistribution, modification, or commercial use.
+
+## Acknowledgements
+
+DevPilot is built with:
+
+- [Next.js](https://nextjs.org/)
+- [React](https://react.dev/)
+- [Spring Boot](https://spring.io/projects/spring-boot)
+- [Spring AI](https://spring.io/projects/spring-ai)
+- [PostgreSQL](https://www.postgresql.org/)
+- [pgvector](https://github.com/pgvector/pgvector)
+- [Docker](https://www.docker.com/)
+- [GitHub OAuth](https://docs.github.com/en/apps/oauth-apps)
