@@ -13,6 +13,7 @@
 ![pgvector](https://img.shields.io/badge/pgvector-enabled-336791?style=flat-square&logo=postgresql&logoColor=white)
 ![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-build-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-integrated-412991?style=flat-square&logo=openai&logoColor=white)
 
 ## Overview
 
